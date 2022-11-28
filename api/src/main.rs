@@ -1,3 +1,3 @@
 fn main() {
-    println!("✔ API is started !");
+    println!("Hello, world!");
 }

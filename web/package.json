@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cargo run --manifest-path api/Cargo.toml & NODE_OPTIONS=--openssl-legacy-provider nuxt",
-    "build": "cargo build --manifest-path api/Cargo.toml && NODE_OPTIONS=--openssl-legacy-provider nuxt build",
-    "start": "api/target/debug/api & NODE_OPTIONS=--openssl-legacy-provider nuxt start",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider nuxt",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider nuxt build",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint:prettier": "prettier --check .",

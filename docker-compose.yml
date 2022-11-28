@@ -1,0 +1,17 @@
+# Docker compose file with nuxt in /web, rust in /api
+version: '3.7'
+services:
+  web:
+    build: ./web
+    ports:
+      - 3000:3000
+    volumes:
+      - ./web:/app
+    command: npm run dev
+  api:
+    build: ./api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./api:/app
+    command: cargo run
