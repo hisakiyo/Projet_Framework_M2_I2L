@@ -6,9 +6,10 @@ use crate::models::{Currency, User, Price, Transaction};
 use crate::schema;
 use crate::DbConn;
 
+// get / say hello
 #[get("/")]
 pub fn index() -> &'static str {
-    "Application successfully started!"
+    "Bienvenue sur notre super API"
 }
 
 #[get("/users")]

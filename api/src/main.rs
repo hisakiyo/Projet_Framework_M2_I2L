@@ -24,8 +24,9 @@ pub struct DbConn(diesel::MysqlConnection);
 
 fn main() {
     rocket::ignite()
-        .mount("/api", routes![
+        .mount("/", routes![
             routes::get_users,
+            routes::index,
         ])
         .attach(DbConn::fairing())
         .attach(cors::CorsFairing)
