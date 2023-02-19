@@ -1,3 +1,5 @@
 ## defaults for _all_ profiles
 [global]
 address = "0.0.0.0"
+[global.databases]
+projet_db = { url = "mysql://projet:kCG6X6vzwU@127.0.0.1/projet_db" }

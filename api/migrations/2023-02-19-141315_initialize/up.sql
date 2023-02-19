@@ -24,7 +24,7 @@ CREATE TABLE `projet_db`.`transactions` (
 -- création de la table currencies pour stocker les informations sur les différentes monnaies/actions
 CREATE TABLE `projet_db`.`currencies` (
   id INT(11) NOT NULL AUTO_INCREMENT,
-  symbol VARCHAR(20) NOT NULL,
+  symbol VARCHAR(20) NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY (id)
 );

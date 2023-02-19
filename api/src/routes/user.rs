@@ -1,4 +1,8 @@
-use crate::{models::{NewUser, User, LoginUser},schema,DbConn,};
+use crate::{
+    models::{NewUser, User, LoginUser},
+    schema,
+    DbConn,
+};
 use rocket::{http::{Cookie, Cookies},http::Status};
 use rocket_contrib::json::{Json, JsonValue};
 use diesel::prelude::*;
