@@ -26,6 +26,8 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
             routes::get_users,
+            routes::register,
+            routes::login,
             routes::index,
         ])
         .attach(DbConn::fairing())
