@@ -8,21 +8,32 @@ services:
     volumes:
       - ./web:/app
     command: npm run dev
+    networks:
+      - nuxt-network
   api:
     build: ./api
     ports:
       - 8000:8000
     volumes:
       - ./api:/app
-    command: cargo watch -x run
+    networks:
+      - nuxt-network
+    environment:
+      - ROCKET_DATABASES={projet_db={url="mysql://projet:kCG6X6vzwU@db:3306/projet_db"}}
   db:
-    image: mariadb
+    image: mariadb:10.4
     ports:
       - 3306:3306
     volumes:
-      - ./db:/var/lib/mysql
+      - ./mariadb:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: Csec8m5VQH
       MYSQL_DATABASE: projet_db
       MYSQL_USER: projet
       MYSQL_PASSWORD: kCG6X6vzwU
+      MYSQL_ROOT_PASSWORD: Csec8m5VQH
+    networks:
+      - nuxt-network
+
+networks:
+  nuxt-network:
+    driver: bridge

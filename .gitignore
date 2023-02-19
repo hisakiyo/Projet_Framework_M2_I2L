@@ -30,4 +30,4 @@ api/**/*.rs.bk
 api/*.pdb
 
 # /db (MongoDB)
-db/
+mariadb/
