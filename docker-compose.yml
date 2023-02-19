@@ -14,4 +14,15 @@ services:
       - 8000:8000
     volumes:
       - ./api:/app
-    command: cargo run
+    command: cargo watch -x run
+  db:
+    image: mariadb
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Csec8m5VQH
+      MYSQL_DATABASE: projet_db
+      MYSQL_USER: projet
+      MYSQL_PASSWORD: kCG6X6vzwU

@@ -66,6 +66,7 @@
         </p>
         <p class="mt-4 pt-4 text-gray-800 border-t border-dashed">
           To get started, remove
+
           <code class="bg-gray-100 text-sm p-1 rounded border"
             >components/Tutorial.vue</code
           >
