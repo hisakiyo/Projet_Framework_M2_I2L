@@ -7,6 +7,7 @@ pub use currency::*;
 pub mod price;
 pub use price::*;
 
+// Show all routes available
 #[get("/")]
 pub fn index() -> &'static str {
     "Bienvenue sur notre super API"

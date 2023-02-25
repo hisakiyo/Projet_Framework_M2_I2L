@@ -1,14 +1,16 @@
 use crate::{
-    models::{NewUser, User, LoginUser},
+    models::{NewUser, User, LoginUser, UpdatePassword},
     schema,
     DbConn,
 };
-use rocket::{http::{Cookie, Cookies},http::Status};
-use rocket_contrib::json::{Json, JsonValue};
+use rocket::{self, http::{Cookie, Cookies}, Data};
+use rocket::http::Status;
+use rocket_contrib::json::{Json, JsonValue,};
 use diesel::prelude::*;
 use config::{Config, ConfigError, File};
+use rocket::request::{self, Request, FromRequest,Outcome};
 use bcrypt::{DEFAULT_COST, hash, verify};
-use jsonwebtoken::{encode, Header, EncodingKey};
+use jsonwebtoken::{encode, Header, EncodingKey,DecodingKey,Validation };
 use chrono::{Utc, Duration};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -110,4 +112,58 @@ pub fn login(login_user: Json<LoginUser>, conn: DbConn) -> Result<JsonValue, Sta
         "message": "User logged in successfully",
         "token": token,
     }))
+}
+
+#[put("/update-password", format = "json", data = "<update_password>")]
+pub fn update_password(update_password: Json<UpdatePassword>, cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
+    match cookies.get("token") {
+        Some(cookie) => {
+            let token = cookie.value();
+            let decoding_key = DecodingKey::from_secret(get_jwt().unwrap().as_ref());
+            let validation = Validation::default();
+            let token_data = jsonwebtoken::decode::<Claim>(token, &decoding_key, &validation);
+            match token_data {
+                Ok(token_data) => {
+                    let email = token_data.claims.email.clone();
+                    println!("Email: {}", email);
+                    let user = schema::users::table
+                        .filter(schema::users::email.eq(&email))
+                        .first::<User>(&*conn)
+                        .optional()
+                        .map_err(|_| Status::InternalServerError)?;
+
+                    let user = match user {
+                        Some(user) => user,
+                        None => return Err(Status::Unauthorized),
+                    };
+
+
+                    let password_matches = verify(&update_password.old_password, &user.password)
+                        .map_err(|_| Status::InternalServerError)?;
+
+                    if !password_matches {
+                        println!("Password doesn't match");
+                        return Err(Status::Unauthorized);
+                    }
+
+                    let hashed_password = match hash(&update_password.new_password, DEFAULT_COST) {
+                        Ok(h) => h,
+                        Err(_) => return Err(Status::InternalServerError),
+                    };
+
+                    let result = diesel::update(schema::users::table)
+                        .filter(schema::users::email.eq(token_data.claims.email))
+                        .set(schema::users::password.eq(hashed_password))
+                        .execute(&*conn);
+
+                    match result {
+                        Ok(_) => Ok(json!({"message": "Password updated successfully"})),
+                        Err(_) => Err(Status::InternalServerError),
+                    }
+                }
+                Err(_) => Err(Status::Unauthorized),
+            }
+        }
+        None => Err(Status::Unauthorized),
+    }
 }

@@ -36,6 +36,7 @@ fn main() {
             routes::get_currencies,
             routes::add_currency,
             routes::get_prices,
+            routes::update_password,
         ])
         .attach(DbConn::fairing())
         .attach(cors::CorsFairing);

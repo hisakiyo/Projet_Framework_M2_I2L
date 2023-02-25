@@ -1,4 +1,3 @@
-use std::time::Duration;
 use serde_json::Value;
 
 pub async fn fetch_currencies() -> Result<(), Box<dyn std::error::Error>> {
