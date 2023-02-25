@@ -4,10 +4,10 @@
       <div class="py-6 md:flex md:items-center md:justify-between lg:border-t lg:border-gray-200">
         <div class="min-w-0 flex-1">
           <div class="flex items-center">
-            <img class="hidden h-16 w-16 rounded-full sm:block" src="businessman.jpeg" alt="" />
+            <img class="hidden h-16 w-16 rounded-full sm:block object-cover" src="/businessman.jpeg" alt="" />
             <div>
               <div class="flex items-center">
-                <img class="h-16 w-16 rounded-full sm:hidden" src="businessman.jpeg" alt="" />
+                <img class="h-16 w-16 rounded-full sm:hidden object-cover" src="/businessman.jpeg" alt="" />
                 <h1 class="ml-3 text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:leading-9">Bienvenue, Sotramp</h1>
               </div>
               <dl class="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">

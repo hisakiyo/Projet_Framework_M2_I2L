@@ -20,7 +20,7 @@ import PageHead from '~/components/Dashboard/Parts/PageHead.vue'
 import Settings from '~/components/Dashboard/Settings.vue'
 
 export default {
-  name: 'Settings',
+  name: 'SettingsPage',
   components: {
     Sidebar,
     PageHead,

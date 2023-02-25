@@ -20,7 +20,7 @@ import PageHead from '~/components/Dashboard/Parts/PageHead.vue'
 import Dashboard from '~/components/Dashboard/Dashboard.vue'
 
 export default {
-  name: 'DashboardComplete',
+  name: 'DashboardPage',
   components: {
     Sidebar,
     PageHead,

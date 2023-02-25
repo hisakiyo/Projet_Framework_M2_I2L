@@ -20,7 +20,7 @@ import PageHead from '~/components/Dashboard/Parts/PageHead.vue'
 import History from '~/components/Dashboard/History.vue'
 
 export default {
-  name: 'History',
+  name: 'HistoryPage',
   components: {
     Sidebar,
     PageHead,

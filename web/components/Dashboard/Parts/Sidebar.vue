@@ -14,7 +14,7 @@
           </div>
           <div class="mt-6 pt-6">
             <div class="space-y-1 px-2">
-              <NuxtLink v-for="item in secondaryNavigation" :key="item.name" :to="item.href" class="group flex items-center rounded-md px-2 py-2 text-sm font-medium leading-6 text-cyan-100 hover:bg-cyan-600 hover:text-white">
+              <NuxtLink v-for="item in secondaryNavigation" :key="item.name" :to="item.href" :class="[item.current ? 'bg-cyan-800 text-white' : 'text-cyan-100 hover:text-white hover:bg-cyan-600', 'group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md']" >
                 <component :is="item.icon" class="mr-4 h-6 w-6 text-cyan-200" aria-hidden="true" />
                 {{ item.name }}
               </NuxtLink>
@@ -33,13 +33,13 @@ export default {
   data() {
     return {
        navigation: [
-        { name: 'Accueil', href: '/dashboard/', icon: '', current: true },
-        { name: 'Historique', href: '/dashboard/history/', icon: '', current: false },
-        { name: 'Soldes', href: '#', icon: '', current: false },
-        { name: 'Achat / Revente', href: '#', icon: '', current: false },
+        { name: 'Accueil', href: '/dashboard/', icon: '', current: this.$router.currentRoute.path === '/dashboard/' },
+        { name: 'Historique', href: '/dashboard/history/', icon: '', current: this.$router.currentRoute.path === '/dashboard/history/' },
+        { name: 'Soldes', href: '/dashboard/balances/', icon: '', current: this.$router.currentRoute.path === '/dashboard/balances/' },
+        { name: 'Achat / Revente', href: '/dashboard/buy-sale/', icon: '', current: this.$router.currentRoute.path === '/dashboard/buy-sale/' },
       ],
       secondaryNavigation: [
-        { name: 'Paramètres', href: '/dashboard/settings/', icon: '' },
+        { name: 'Paramètres', href: '/dashboard/settings/', icon: '', current: this.$router.currentRoute.path === '/dashboard/settings/' },
         { name: 'Deconnexion', href: '#', icon: '' },
       ],
       sidebarOpen: false,
