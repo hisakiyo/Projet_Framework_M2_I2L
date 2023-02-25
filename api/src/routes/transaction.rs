@@ -201,8 +201,8 @@ pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Sta
                         transactions_with_price_and_currency.push(transaction_with_price_and_currency);
                     }
 
-                    // Sort transactions by timestamp (oldest first)
-                    transactions_with_price_and_currency.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+                    // Sort transactions by timestamp (newest first)
+                    transactions_with_price_and_currency.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
                     Ok(json!({
                         "transactions": transactions_with_price_and_currency,
