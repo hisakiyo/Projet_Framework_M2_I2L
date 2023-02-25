@@ -1,9 +1,9 @@
 <template>
-  <Login />
+  <Signup />
 </template>
 
 <script>
 export default {
-  name: 'IndexPage',
+  name: 'SignupPage'
 }
 </script>
