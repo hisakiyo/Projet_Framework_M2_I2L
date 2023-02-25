@@ -41,7 +41,7 @@ export default {
        navigation: [
         { name: 'Accueil', href: '/dashboard/', icon: '', current: this.$router.currentRoute.path === '/dashboard/' },
         { name: 'Historique', href: '/dashboard/history/', icon: '', current: this.$router.currentRoute.path === '/dashboard/history/' },
-        { name: 'Soldes', href: '/dashboard/balances/', icon: '', current: this.$router.currentRoute.path === '/dashboard/balances/' },
+        { name: 'Balances', href: '/dashboard/balance/', icon: '', current: this.$router.currentRoute.path === '/dashboard/balance/' },
         { name: 'Achat / Revente', href: '/dashboard/buy-sales/', icon: '', current: this.$router.currentRoute.path === '/dashboard/buy-sales/' },
       ],
       secondaryNavigation: [

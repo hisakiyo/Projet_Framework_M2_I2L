@@ -24,6 +24,10 @@
             </div>
           </div>
         </div>
+        <!-- ajouter "voir plus" tout à droite avec un lien -->
+        <NuxtLink to="/dashboard/balance/" class="col-span-1 flex justify-center py-12 px-4 border-2 border-dashed border-gray-200 rounded-lg hover:bg-gray-50">
+          Voir plus
+        </NuxtLink>
       </div>
     </div>
 
@@ -134,13 +138,16 @@ export default {
       this.$axios.get('/api/crypto_balance')
         .then(response => {
           response.data.crypto_balance.forEach((crypto) => {
-            this.cards.push({
-              name: 'Balance ' + crypto.currency.name,
-              href: '#',
-              icon: '',
-              amount: crypto.quantity,
-              symbol: crypto.currency.symbol,
-            })
+            console.log('crypto', crypto)
+            if(this.cards.length < 2) {
+              this.cards.push({
+                name: 'Balance ' + crypto.currency.name,
+                href: '#',
+                icon: '',
+                amount: crypto.quantity,
+                symbol: crypto.currency.symbol,
+              })
+            }
           })
         })
         .catch(error => {
