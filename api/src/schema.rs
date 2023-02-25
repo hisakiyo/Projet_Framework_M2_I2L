@@ -24,7 +24,8 @@ diesel::table! {
         symbol -> Varchar,
         price -> Decimal,
         quantity -> Decimal,
-        date -> Datetime,
+        transaction_type -> Varchar,
+        timestamp -> Datetime,
     }
 }
 

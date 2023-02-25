@@ -1,12 +1,12 @@
 use crate::{
-    models::{Currency, NewCurrency, UpdateCurrency, currency, NewPrice, CurrencyWithPrice},
+    models::{Currency, NewCurrency, NewPrice, CurrencyWithPrice,CurrencyWithPriceAndLastUpdate},
     schema,
     DbConn,
 };
-use rocket::{http::{Cookie, Cookies},http::Status};
-use rocket_contrib::json::{Json, JsonValue};
+use rocket::{http::Status};
+use rocket_contrib::json::{Json};
 use diesel::prelude::*;
-use chrono::{Utc, Duration};
+use chrono::{Utc, NaiveDateTime};
 
 // get all currencies
 #[get("/currencies")]
@@ -56,3 +56,25 @@ pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<J
         Ok(response)
     }
 }
+
+#[get("/currencies_with_price")]
+pub fn get_currencies_with_price(conn: DbConn) -> Json<Vec<CurrencyWithPriceAndLastUpdate>> {
+    use diesel::dsl::sql;
+
+    let results = schema::currencies::table
+        .inner_join(schema::prices::table)
+        .select((
+            schema::currencies::id,
+            schema::currencies::symbol,
+            schema::currencies::name,
+            schema::prices::price,
+            sql::<diesel::sql_types::Timestamp>("MAX(timestamp)"),
+        ))
+        .group_by(schema::currencies::id)
+        .load::<CurrencyWithPriceAndLastUpdate>(&*conn)
+        .expect("Error loading currencies");
+
+    Json(results)
+}
+
+

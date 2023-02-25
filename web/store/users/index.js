@@ -23,6 +23,9 @@ export const actions = {
         commit('SET_USER', null)
     },
     async register({ commit }, account) {
-        const res = await this.$axios.$post('/api/register', account)
-    }
+        await this.$axios.$post('/api/register', account)
+    },
+    async updatePassword({ commit }, password) {
+        await this.$axios.$put('/api/update-password', password)
+    },
 }

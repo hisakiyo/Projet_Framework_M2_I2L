@@ -3,25 +3,23 @@ use crate::{
     schema,
     DbConn,
 };
-use rocket::{self, http::{Cookie, Cookies}, Data};
+use rocket::{self, http::{Cookies}};
 use rocket::http::Status;
 use rocket_contrib::json::{Json, JsonValue,};
 use diesel::prelude::*;
 use config::{Config, ConfigError, File};
-use rocket::request::{self, Request, FromRequest,Outcome};
 use bcrypt::{DEFAULT_COST, hash, verify};
 use jsonwebtoken::{encode, Header, EncodingKey,DecodingKey,Validation };
-use chrono::{Utc, Duration};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claim {
-    email: String,
-    username: String,
-    exp: usize,
-    iat: usize,
+pub(crate) struct Claim {
+    pub email: String,
+    pub username: String,
+    pub exp: usize,
+    pub iat: usize,
 }
 
-fn get_jwt() -> Result<String, ConfigError> {
+pub(crate) fn get_jwt() -> Result<String, ConfigError> {
     let mut config = Config::default();
     config.merge(File::with_name("config"))?;
 
@@ -125,7 +123,6 @@ pub fn update_password(update_password: Json<UpdatePassword>, cookies: Cookies, 
             match token_data {
                 Ok(token_data) => {
                     let email = token_data.claims.email.clone();
-                    println!("Email: {}", email);
                     let user = schema::users::table
                         .filter(schema::users::email.eq(&email))
                         .first::<User>(&*conn)
@@ -142,7 +139,6 @@ pub fn update_password(update_password: Json<UpdatePassword>, cookies: Cookies, 
                         .map_err(|_| Status::InternalServerError)?;
 
                     if !password_matches {
-                        println!("Password doesn't match");
                         return Err(Status::Unauthorized);
                     }
 

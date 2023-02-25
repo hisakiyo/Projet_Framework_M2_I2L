@@ -8,7 +8,7 @@ use rocket_contrib::json::{Json, JsonValue};
 use diesel::prelude::*;
 use chrono::{Utc, Duration};
 
-// get all prices
+// get all prices, also add currency name and symbol from price.currency_id
 #[get("/prices")]
 pub fn get_prices(conn: DbConn) -> Json<Vec<Price>> {
     let results = schema::prices::table

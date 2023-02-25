@@ -17,3 +17,14 @@ pub struct NewPrice {
     pub price: BigDecimal,
     pub timestamp: NaiveDateTime,
 }
+
+// prices with id, currency_id, price, timestamp, symbol, name
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+pub struct Prices {
+    pub id: i32,
+    pub currency_id: i32,
+    pub price: BigDecimal,
+    pub timestamp: NaiveDateTime,
+    pub symbol: String,
+    pub name: String,
+}

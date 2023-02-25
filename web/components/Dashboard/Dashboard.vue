@@ -77,7 +77,7 @@ export default {
   data() {
     return {
       cards: [
-        { name: 'Solde du compte', href: '#', icon: '', amount: '€ 30,659.45' },
+        { name: 'Solde du compte', href: '#', icon: '', amount: 'XXXX,XX €' },
         // More items...
       ],
       transactions: [
@@ -119,6 +119,16 @@ export default {
         failed: 'bg-gray-100 text-gray-800',
       }
     }
-  }
+  },
+  mounted() {
+    // get balance
+    this.$axios.get('/api/balance')
+      .then(response => {
+        this.cards[0].amount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(response.data.balance);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  },
 };
 </script>

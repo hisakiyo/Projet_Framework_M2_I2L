@@ -75,7 +75,7 @@ export default {
   tailwindcss: {
     config: {
       content: [],
-      plugins: [tailwindForm]
+      plugins: [tailwindForm],
     }
   }
 }

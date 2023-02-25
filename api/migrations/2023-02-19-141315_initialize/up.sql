@@ -16,7 +16,8 @@ CREATE TABLE `projet_db`.`transactions` (
   symbol VARCHAR(20) NOT NULL,
   price DECIMAL(13,2) NOT NULL,
   quantity DECIMAL(13,2) NOT NULL,
-  date DATETIME NOT NULL,
+  transaction_type VARCHAR(20) NOT NULL,
+  timestamp DATETIME NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
