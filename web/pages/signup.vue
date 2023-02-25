@@ -4,6 +4,7 @@
 
 <script>
 export default {
-  name: 'SignupPage'
+  name: 'SignupPage',
+  middleware: 'need_auth',
 }
 </script>

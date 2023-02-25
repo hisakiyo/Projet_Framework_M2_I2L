@@ -21,6 +21,7 @@ import Settings from '~/components/Dashboard/Settings.vue'
 
 export default {
   name: 'SettingsPage',
+  middleware: 'need_auth',
   components: {
     Sidebar,
     PageHead,

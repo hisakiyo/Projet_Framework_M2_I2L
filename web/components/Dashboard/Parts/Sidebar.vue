@@ -18,6 +18,12 @@
                 <component :is="item.icon" class="mr-4 h-6 w-6 text-cyan-200" aria-hidden="true" />
                 {{ item.name }}
               </NuxtLink>
+              <span class="group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md text-cyan-100 hover:text-white hover:bg-cyan-600" @click="logout">
+                <svg class="mr-4 h-6 w-6 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3m18 8H9a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2z"></path>
+                </svg>
+                Déconnexion
+              </span>
             </div>
           </div>
         </nav>
@@ -40,9 +46,19 @@ export default {
       ],
       secondaryNavigation: [
         { name: 'Paramètres', href: '/dashboard/settings/', icon: '', current: this.$router.currentRoute.path === '/dashboard/settings/' },
-        { name: 'Deconnexion', href: '#', icon: '' },
       ],
       sidebarOpen: false,
+    }
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('users/logout')
+      .then(() => {
+        this.$router.push('/')
+      })
+      .catch((err) => {
+        console.log(err)
+      })
     }
   }
 };

@@ -21,6 +21,7 @@ import Dashboard from '~/components/Dashboard/Dashboard.vue'
 
 export default {
   name: 'DashboardPage',
+  middleware: 'need_auth',
   components: {
     Sidebar,
     PageHead,

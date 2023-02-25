@@ -32,6 +32,7 @@ fn main() {
             routes::get_users,
             routes::register,
             routes::login,
+            routes::logout,
             routes::index,
             routes::get_currencies,
             routes::add_currency,

@@ -38,6 +38,8 @@
 
               <div>
                 <button @click="register" class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">M'inscrire</button>
+                <!-- Retour -->
+                <NuxtLink to="/" class="mt-2 flex w-full justify-center rounded-md border border-transparent bg-gray-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">Retour</NuxtLink>
               </div>
 
               <!-- Message with an background color depending on the type -->
@@ -83,6 +85,7 @@ export default {
           text: 'Inscription réussie',
         };
       }).catch((err) => {
+        console.log(err)
         // if 409, the username is already taken
         if (err.response.status === 409) {
           this.msg = {

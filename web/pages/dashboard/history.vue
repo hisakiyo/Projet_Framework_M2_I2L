@@ -21,6 +21,7 @@ import History from '~/components/Dashboard/History.vue'
 
 export default {
   name: 'HistoryPage',
+  middleware: 'need_auth',
   components: {
     Sidebar,
     PageHead,

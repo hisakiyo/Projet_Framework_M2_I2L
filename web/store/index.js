@@ -7,7 +7,7 @@ export const actions = {
         if (!req.headers.cookie) return
 
         const parsed = cookieparser.parse(req.headers.cookie)
-        const accessTokenCookie = parsed.access_token
+        const accessTokenCookie = parsed.token
 
         if (!accessTokenCookie) return
 
