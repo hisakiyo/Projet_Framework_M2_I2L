@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 class="text-lg font-medium leading-6 text-gray-900">Balance - {{ totalUsdBalance }}</h2>
+            <h2 class="text-lg font-medium leading-6 text-gray-900">Balance: {{ totalUsdBalance }}</h2>
             <!-- Show zero balance checkbox -->
             <input type="checkbox" id="showZeroBalance" v-model="showZeroBalance" class="mt-2">
             <label for="showZeroBalance" class="ml-2">Afficher les balances à 0</label>

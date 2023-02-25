@@ -23,7 +23,7 @@
                           <!-- Quantité -->
                           <div class="mt-1">
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="grid mt-1 relative rounded-md shadow-sm">
                               <input type="number" step="0.01" min="0" name="quantity" id="quantity" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="0.00" v-model="quantity">
                               <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">
@@ -31,6 +31,13 @@
                                 </span>
                               </div>
                             </div>
+
+                              <button type="button" class="mt-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-l" @click="quantity = 0">
+                                  Minimum
+                              </button>
+                              <button type="button" class="mt-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-r" @click="quantity = (type === 'buy' ? Math.floor((balance / selectedItem.price)*100)/100 : findBalance(selectedItem.id))">
+                                  Maximum
+                              </button>
                           </div>
                           <!-- Prix unitaire is already filled, it's selectedItem.price -->
                           <div class="mt-1">
@@ -111,6 +118,7 @@
                 <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Symbole</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Nom</th>
                 <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Prix</th>
+                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Quantité acquise</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Date de dernière mise à jour</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Actions</th>
               </tr>
@@ -125,6 +133,9 @@
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <p class="text-gray-900 font-medium">{{ formattedPrice(price.price) }}</p>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                  <p class="text-gray-900 font-medium">{{ findBalance(price.id) }}</p>
                 </td>
 
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
@@ -167,7 +178,7 @@ export default {
     },
     methods: {
       findBalance(id) {
-        return this.balanceCrypto.find(item => item.currency.id === id) && this.balanceCrypto.find(item => item.currency.id === id).quantity || 0;
+        return this.balanceCrypto && this.balanceCrypto.find(item => item.currency.id === id) && this.balanceCrypto.find(item => item.currency.id === id).quantity || 0;
       },
       getBalanceCrypto() {
         this.$axios.get('/api/crypto_balance')
