@@ -41,6 +41,7 @@
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant crypto</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant en $US</th>
                 <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Type</th>
+                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Balance</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Date</th>
               </tr>
               </thead>
@@ -56,10 +57,13 @@
                   <span class="font-medium text-gray-900">{{ transaction.quantity }}<span class="font-medium text-gray-500"> {{ transaction.currency.symbol }}</span></span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                  <span class="font-medium text-gray-900">{{ formatPrice(Math.ceil(transaction.quantity * transaction.price * 100)/100) }}</span>
+                  <span class="font-medium text-gray-900">{{ transaction.transaction_type === 'buy' ? '-' : '+' }}{{ formatPrice(Math.ceil(transaction.quantity * transaction.price * 100)/100) }}</span>
                 </td>
                 <td class="hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 md:block">
                   <span :class="[statusStyles[transaction.transaction_type], 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize']">{{ transaction.transaction_type === 'buy' ? 'Achat' : 'Vente' }}</span>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                  <span class="font-medium text-gray-900">{{ formatPrice(transaction.balance) }}</span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                   <time :datetime="transaction.datetime">{{ formatAgo(transaction.timestamp) }}</time>
@@ -121,10 +125,30 @@ export default {
           console.log(error);
         });
     },
+    addBalance(transactions) {
+      let balance = 10000; // Balance initiale de l'utilisateur
+      transactions.forEach((transaction) => {
+        const price = parseFloat(transaction.price); // Convertir le prix en nombre à virgule flottante
+        const quantity = parseFloat(transaction.quantity); // Convertir la quantité en nombre à virgule flottante
+        const transactionType = transaction.transaction_type;
+        if (transactionType === "buy") {
+          balance -= price * quantity; // Soustraire le coût de l'achat de la balance
+        } else if (transactionType === "sell") {
+          balance += price * quantity; // Ajouter le produit de la vente à la balance
+        }
+        transaction.balance = balance.toFixed(2); // Ajouter la balance mise à jour à l'objet de transaction
+      });
+      return transactions;
+    },
     getTransactions() {
       this.$axios.get('/api/transactions')
         .then(response => {
           this.transactions = response.data.transactions;
+          this.addBalance(this.transactions);
+          // sort this.transactions by id DESC
+          this.transactions.sort((a, b) => {
+            return b.id - a.id;
+          });
         })
         .catch(error => {
           console.log(error);

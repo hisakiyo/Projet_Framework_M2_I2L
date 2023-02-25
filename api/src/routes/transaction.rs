@@ -58,10 +58,10 @@ pub fn get_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> 
                     // get starting balance from get_starting_balance() function
                     let mut balance = get_starting_balance().unwrap();
                     for transaction in transactions {
-                        if transaction.transaction_type == "credit" {
-                            balance += transaction.quantity * transaction.price;
-                        } else {
+                        if transaction.transaction_type == "buy" {
                             balance -= transaction.quantity * transaction.price;
+                        } else {
+                            balance += transaction.quantity * transaction.price;
                         }
                     }
 
@@ -199,8 +199,8 @@ pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Sta
                         transactions_with_price_and_currency.push(transaction_with_price_and_currency);
                     }
 
-                    // Sort transactions by timestamp
-                    transactions_with_price_and_currency.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+                    // Sort transactions by timestamp (oldest first)
+                    transactions_with_price_and_currency.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
                     Ok(json!({
                         "transactions": transactions_with_price_and_currency,
