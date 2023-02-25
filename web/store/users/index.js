@@ -19,7 +19,6 @@ export const actions = {
         commit('SET_USER', user)
     },
     async logout({ commit }) {
-        await this.$axios.$post('/api/logout')
         this.$cookiz.set('token', null)
         commit('SET_USER', null)
     },
