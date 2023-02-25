@@ -8,8 +8,12 @@
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div class="sm:flex sm:items-start">
                     <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                      <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                      <!-- add svg, if sell or buy -->
+                      <svg v-if="type === 'buy'" class="h-6 w-6 text-green-600" x-description="Heroicon name: outline/plus-circle" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <svg v-if="type === 'sell'" class="h-6 w-6 text-red-600" x-description="Heroicon name: outline/minus-circle" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                       </svg>
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
@@ -20,7 +24,7 @@
                           <div class="mt-1">
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                              <input type="number" step="0.01" name="quantity" id="quantity" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="0.00" v-model="quantity">
+                              <input type="number" step="0.01" min="0" name="quantity" id="quantity" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="0.00" v-model="quantity">
                               <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">
                                   {{ selectedItem.symbol }}
@@ -35,7 +39,7 @@
                               <input disabled type="number" step="0.01" name="unit_price" id="unit_price" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md bg-gray-100" placeholder="0.00" v-model="selectedItem.price">
                               <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">
-                                  €
+                                  $US
                                 </span>
                               </div>
                             </div>
@@ -45,12 +49,39 @@
                             <label for="total_price" class="block text-sm font-medium text-gray-700">Total</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
                               <span disabled type="number" step="0.01" name="total_price" id="total_price" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md bg-gray-100" placeholder="0.00" :value="quantity * selectedItem.price">
-                                {{ quantity * selectedItem.price }}
+                                {{ formattedPrice(Math.ceil(quantity * selectedItem.price*100)/100) }}
                               </span>
-                              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">
-                                  €
-                                </span>
+                            </div>
+                          </div>
+                          <!-- Disponible -->
+                          <div class="mt-1" v-if="type === 'buy'">
+                            <label for="available" class="block text-sm font-medium text-gray-700">Disponible</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                              <!-- If balance > Math.ceil(quantity * selectedItem.price*100)/100) then it should be background green, else red -->
+                              <span disabled type="number" step="0.01" name="available" id="available" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" :class="balance >= Math.ceil(quantity * selectedItem.price*100)/100 ? 'bg-green-100' : 'bg-red-100'" placeholder="0.00" :value="balance">
+                                {{ formattedPrice(balance) }}
+                              </span>
+                              <!-- Logo warning if balance < Math.ceil(quantity * selectedItem.price*100)/100) -->
+                              <div v-if="balance <= Math.ceil(quantity * selectedItem.price*100)/100" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-red-500" x-description="Heroicon name: outline/exclamation-circle" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a9 9 0 100 18 9 9 0 000-18z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- disponible crypto -->
+                          <div class="mt-1" v-if="type === 'sell'">
+                            <label for="available" class="block text-sm font-medium text-gray-700">Disponible</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                              <!-- If balance > Math.ceil(quantity * selectedItem.price*100)/100) then it should be background green, else red -->
+                              <span disabled type="number" step="0.01" name="available" id="available" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" :class="quantity <= findBalance(selectedItem.id) ? 'bg-green-100' : 'bg-red-100'" placeholder="0.00" :value="findBalance(selectedItem.id)">
+                                {{ findBalance(selectedItem.id) }} {{ selectedItem.symbol }}
+                              </span>
+                              <!-- Logo warning if balance < Math.ceil(quantity * selectedItem.price*100)/100) -->
+                              <div v-if="selectedItem.quantity < quantity" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-red-500" x-description="Heroicon name: outline/exclamation-circle" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a9 9 0 100 18 9 9 0 000-18z" />
+                                </svg>
                               </div>
                             </div>
                           </div>
@@ -60,7 +91,7 @@
                   </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button type="button" class="inline-flex w-full justify-center rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" @click="doTransaction"> {{ type === 'buy' ? 'Acheter' : 'Vendre' }} </button>
+                  <button type="button" :class="type === 'buy' ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700'" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" @click="doTransaction" :disabled="quantity <= 0"> {{ type === 'buy' ? 'Acheter' : 'Vendre' }} </button>
                   <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="modal = false">Cancel</button>
                 </div>
               </div>
@@ -123,20 +154,44 @@ export default {
         prices: [],
         modal: false,
         selectedItem: null,
+        balance: 0.0,
         type: null,
         quantity: 0.0,
+        balanceCrypto: null
       }
     },
-    mounted() {
+    async mounted() {
+      await this.getBalanceCrypto();
+      await this.getBalance();
       this.getPrices();
     },
     methods: {
+      findBalance(id) {
+        return this.balanceCrypto.find(item => item.currency.id === id) && this.balanceCrypto.find(item => item.currency.id === id).quantity || 0;
+      },
+      getBalanceCrypto() {
+        this.$axios.get('/api/crypto_balance')
+          .then(response => {
+            this.balanceCrypto = response.data.crypto_balance;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      },
+      getBalance() {
+        this.$axios.get('/api/balance')
+          .then(response => {
+            this.balance = response.data.balance;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      },
       openModal(item, type) {
         this.quantity = 0.0;
         this.selectedItem = item;
         this.modal = true;
         this.type = type;
-        console.log(this.selectedItem)
       },
       formatAgo(date) {
         return new Date(date).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' });
@@ -161,10 +216,29 @@ export default {
         })
           .then(response => {
             this.modal = false;
-            this.getPrices();
+            this.getBalance();
+            this.getBalanceCrypto();
+            this.$swal({
+              toast: true,
+              position: 'bottom-end',
+              showConfirmButton: false,
+              timer: 5000,
+              timerProgressBar: true,
+              icon: 'success',
+              title: 'Transaction effectuée\n' + (this.type === 'buy' ? '+' : '-') + this.quantity + ' ' + this.selectedItem.symbol
+            });
           })
           .catch(error => {
             console.log(error);
+            this.$swal({
+              toast: true,
+              position: 'bottom-end',
+              showConfirmButton: false,
+              timer: 5000,
+              timerProgressBar: true,
+              icon: 'error',
+              title: 'Une erreur est survenue'
+            });
           });
       },
     },

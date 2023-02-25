@@ -2,7 +2,7 @@ use crate::schema::prices;
 use chrono::NaiveDateTime;
 use bigdecimal::BigDecimal;
 
-#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
 pub struct Price {
     pub id: i32,
     pub currency_id: i32,

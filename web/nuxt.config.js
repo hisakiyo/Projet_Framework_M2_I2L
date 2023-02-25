@@ -39,6 +39,7 @@ export default {
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
     ['cookie-universal-nuxt', { alias: 'cookiz' }],
+    "vue-sweetalert2/nuxt",
   ],
 
   server: {

@@ -20,14 +20,14 @@
           </div>
           <div class="bg-gray-50 px-5 py-3">
             <div class="text-sm">
-              <a :href="card.href" class="font-medium text-cyan-700 hover:text-cyan-900">Voir tout</a>
+              <NuxtLink to="/dashboard/history/" class="font-medium text-cyan-700 hover:text-cyan-900">Voir tout</NuxtLink>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <h2 class="mx-auto mt-8 max-w-6xl px-4 text-lg font-medium leading-6 text-gray-900 sm:px-6 lg:px-8">Activité récente</h2>
+    <h2 class="mx-auto mt-8 max-w-6xl px-4 text-lg font-medium leading-6 text-gray-900 sm:px-6 lg:px-8">5 dernières transactions</h2>
 
     <div class="hidden sm:block">
       <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -41,7 +41,6 @@
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant crypto</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant en $US</th>
                 <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Type</th>
-                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Balance</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Date</th>
               </tr>
               </thead>
@@ -63,9 +62,6 @@
                   <span :class="[statusStyles[transaction.transaction_type], 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize']">{{ transaction.transaction_type === 'buy' ? 'Achat' : 'Vente' }}</span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                  <span class="font-medium text-gray-900">{{ formatPrice(transaction.balance) }}</span>
-                </td>
-                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                   <time :datetime="transaction.datetime">{{ formatAgo(transaction.timestamp) }}</time>
                 </td>
               </tr>
@@ -84,7 +80,7 @@ export default {
   data() {
     return {
       cards: [
-        { name: 'Solde du compte', href: '#', icon: '', amount: 'XXXX,XX €' },
+        { name: 'Solde FIAT', href: '#', icon: '', amount: 'XXXX,XX €' },
       ],
       prices: [],
       transactions: null,
@@ -96,7 +92,7 @@ export default {
   },
   async mounted() {
     await this.getPrices();
-    this.getBalance();
+    await this.getBalance();
     this.getTransactions();
     this.getCryptoBalance();
   },
@@ -125,30 +121,10 @@ export default {
           console.log(error);
         });
     },
-    addBalance(transactions) {
-      let balance = 10000; // Balance initiale de l'utilisateur
-      transactions.forEach((transaction) => {
-        const price = parseFloat(transaction.price); // Convertir le prix en nombre à virgule flottante
-        const quantity = parseFloat(transaction.quantity); // Convertir la quantité en nombre à virgule flottante
-        const transactionType = transaction.transaction_type;
-        if (transactionType === "buy") {
-          balance -= price * quantity; // Soustraire le coût de l'achat de la balance
-        } else if (transactionType === "sell") {
-          balance += price * quantity; // Ajouter le produit de la vente à la balance
-        }
-        transaction.balance = balance.toFixed(2); // Ajouter la balance mise à jour à l'objet de transaction
-      });
-      return transactions;
-    },
     getTransactions() {
-      this.$axios.get('/api/transactions')
+      this.$axios.get('/api/last_transactions')
         .then(response => {
           this.transactions = response.data.transactions;
-          this.addBalance(this.transactions);
-          // sort this.transactions by id DESC
-          this.transactions.sort((a, b) => {
-            return b.id - a.id;
-          });
         })
         .catch(error => {
           console.log(error);
