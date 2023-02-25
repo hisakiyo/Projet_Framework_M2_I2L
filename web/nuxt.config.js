@@ -73,6 +73,7 @@ export default {
   // Config for tailwindcss
   tailwindcss: {
     config: {
+      content: [],
       plugins: [tailwindForm]
     }
   }

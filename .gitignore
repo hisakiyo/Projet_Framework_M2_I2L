@@ -31,3 +31,8 @@ api/*.pdb
 
 # /db (MongoDB)
 mariadb/
+
+# Local files
+.DS_Store
+.idea/
+web/.DS_Store
