@@ -135,7 +135,7 @@ export default {
         .then(response => {
           response.data.crypto_balance.forEach((crypto) => {
             this.cards.push({
-              name: crypto.currency.name,
+              name: 'Balance ' + crypto.currency.name,
               href: '#',
               icon: '',
               amount: crypto.quantity,
