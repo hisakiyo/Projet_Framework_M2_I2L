@@ -57,7 +57,7 @@
                   <span class="font-medium text-gray-900">{{ formatPrice(transaction.price) }}</span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                  <span class="font-medium text-gray-900">{{ transaction.quantity }}<span class="font-medium text-gray-500"> {{ transaction.currency.symbol }}</span></span>
+                  <span class="font-medium text-gray-900">{{ transaction.transaction_type === 'buy' ? '+' : '-' }}{{ transaction.quantity }}<span class="font-medium text-gray-500"> {{ transaction.currency.symbol }}</span></span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                   <span class="font-medium text-gray-900">{{ transaction.transaction_type === 'buy' ? '-' : '+' }}{{ formatPrice(Math.ceil(transaction.quantity * transaction.price * 100)/100) }}</span>
