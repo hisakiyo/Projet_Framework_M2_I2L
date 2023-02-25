@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 class="text-lg font-medium leading-6 text-gray-900">Balance</h2>
+            <h2 class="text-lg font-medium leading-6 text-gray-900">Balance - {{ totalUsdBalance }}</h2>
             <!-- Show zero balance checkbox -->
             <input type="checkbox" id="showZeroBalance" v-model="showZeroBalance" class="mt-2">
             <label for="showZeroBalance" class="ml-2">Afficher les balances à 0</label>
@@ -58,6 +58,7 @@ export default {
         modal: false,
         selectedItem: null,
         balance: 0.0,
+        totalUsdBalance: 0.0,
         type: null,
         quantity: 0.0,
         balanceCrypto: null,
@@ -81,6 +82,11 @@ export default {
         this.$axios.get('/api/crypto_balance')
           .then(response => {
             this.balanceCrypto = response.data.crypto_balance;
+            this.totalUsdBalance = response.data.crypto_balance.reduce((acc, crypto) => {
+                const price = this.prices.find(price => price.id === crypto.currency.id).price;
+                return acc + (crypto.quantity * price);
+            }, 0);
+            this.totalUsdBalance = this.formattedPrice(this.totalUsdBalance);
           })
           .catch(error => {
             console.log(error);

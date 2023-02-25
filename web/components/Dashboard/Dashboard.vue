@@ -84,6 +84,7 @@ export default {
   data() {
     return {
       cards: [
+        { name: 'Evaluation totale portefeuille', href: '#', icon: '', amount: 'XXXX,XX €' },
         { name: 'Solde FIAT', href: '#', icon: '', amount: 'XXXX,XX €' },
       ],
       prices: [],
@@ -119,7 +120,7 @@ export default {
     getBalance() {
       this.$axios.get('/api/balance')
         .then(response => {
-          this.cards[0].amount = this.formatPrice(response.data.balance)
+          this.cards[1].amount = this.formatPrice(response.data.balance)
         })
         .catch(error => {
           console.log(error);
@@ -137,18 +138,11 @@ export default {
     getCryptoBalance() {
       this.$axios.get('/api/crypto_balance')
         .then(response => {
-          response.data.crypto_balance.forEach((crypto) => {
-            console.log('crypto', crypto)
-            if(this.cards.length < 2) {
-              this.cards.push({
-                name: 'Balance ' + crypto.currency.name,
-                href: '#',
-                icon: '',
-                amount: crypto.quantity,
-                symbol: crypto.currency.symbol,
-              })
-            }
-          })
+          this.cards[0].amount = response.data.crypto_balance.reduce((acc, crypto) => {
+            const price = this.prices.find(price => price.id === crypto.currency.id).price;
+            return acc + (crypto.quantity * price);
+          }, 0);
+          this.cards[0].amount = this.formatPrice(this.cards[0].amount);
         })
         .catch(error => {
           console.log(error);
