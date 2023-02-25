@@ -5,7 +5,7 @@
         <div>
           <h2 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">Connectez-vous</h2>
           <p class="mt-2 text-sm text-gray-600">
-            <a href="#" class="font-medium text-sky-600 hover:text-sky-500">Vous n'avez pas de compte ? Inscrivez-vous</a>
+            <NuxtLink to="/signup" class="font-medium text-sky-600 hover:text-sky-500">Vous n'avez pas de compte ? Inscrivez-vous</NuxtLink>
           </p>
         </div>
 
