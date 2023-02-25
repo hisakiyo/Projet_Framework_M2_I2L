@@ -1,5 +1,5 @@
 use crate::{
-    models::{ User, Transaction, NewTransaction},
+    models::{ User, Transaction, NewTransaction, Price, TransactionReceiver, TransactionWithPriceAndCurrency, Currency, CryptoBalance },
     schema,
     DbConn,
 };
@@ -76,6 +76,74 @@ pub fn get_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> 
     }
 }
 
+// get user crypto balance: how much of each crypto he has (ex: BTC: 0.5, ETH: 1.2)
+// It should add all transactions of the user and return the balance. If transaction is type sell, it should subtract the quantity from the balance of the currency
+// If transaction is type buy, it should add the quantity to the balance of the currency
+#[get("/crypto_balance")]
+pub fn get_crypto_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
+    match cookies.get("token") {
+        Some(cookie) => {
+            let token = cookie.value();
+            let decoding_key = DecodingKey::from_secret(get_jwt().unwrap().as_ref());
+            let validation = Validation::default();
+            let token_data = jsonwebtoken::decode::<Claim>(token, &decoding_key, &validation);
+            match token_data {
+                Ok(token_data) => {
+                    let email = token_data.claims.email.clone();
+                    let user = schema::users::table
+                        .filter(schema::users::email.eq(&email))
+                        .first::<User>(&*conn)
+                        .optional()
+                        .map_err(|_| Status::InternalServerError)?;
+
+                    let user = match user {
+                        Some(user) => user,
+                        None => return Err(Status::Unauthorized),
+                    };
+
+                    let transactions = schema::transactions::table
+                        .filter(schema::transactions::user_id.eq(user.id))
+                        .load::<Transaction>(&*conn)
+                        .map_err(|_| Status::InternalServerError)?;
+
+                    let mut crypto_balance: Vec<CryptoBalance> = Vec::new();
+                    for transaction in transactions {
+                        let currency = schema::currencies::table
+                            .filter(schema::currencies::id.eq(transaction.currency_id))
+                            .first::<Currency>(&*conn)
+                            .map_err(|_| Status::InternalServerError)?;
+
+                        let mut found = false;
+                        for balance in &mut crypto_balance {
+                            if balance.currency.id == currency.id {
+                                if transaction.transaction_type == "buy" {
+                                    balance.quantity += transaction.quantity.clone();
+                                } else {
+                                    balance.quantity -= transaction.quantity.clone();
+                                }
+                                found = true;
+                            }
+                        }
+                        if !found {
+                            crypto_balance.push(CryptoBalance {
+                                currency,
+                                quantity: transaction.quantity,
+                            });
+                        }
+                    }
+
+                    Ok(json!({
+                        "crypto_balance": crypto_balance,
+                    }))
+                }
+                Err(_) => Err(Status::Unauthorized),
+            }
+        }
+        None => Err(Status::Unauthorized),
+    }
+}
+
+
 // Get all transactions of the user
 #[get("/transactions")]
 pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
@@ -104,8 +172,38 @@ pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Sta
                         .load::<Transaction>(&*conn)
                         .map_err(|_| Status::InternalServerError)?;
 
+                    let mut transactions_with_price_and_currency: Vec<TransactionWithPriceAndCurrency> = Vec::new();
+                    for transaction in transactions {
+                        let price = schema::prices::table
+                            .filter(schema::prices::currency_id.eq(transaction.currency_id))
+                            .order(schema::prices::timestamp.desc())
+                            .first::<Price>(&*conn)
+                            .optional()
+                            .map_err(|_| Status::InternalServerError)?;
+
+                        let currency = schema::currencies::table
+                            .filter(schema::currencies::id.eq(transaction.currency_id))
+                            .first::<Currency>(&*conn)
+                            .optional()
+                            .map_err(|_| Status::InternalServerError)?;
+
+                        let transaction_with_price_and_currency = TransactionWithPriceAndCurrency {
+                            id: transaction.id,
+                            price: price.unwrap().price,
+                            quantity: transaction.quantity,
+                            transaction_type: transaction.transaction_type,
+                            currency: currency.unwrap(),
+                            timestamp: transaction.timestamp.clone(),
+                        };
+
+                        transactions_with_price_and_currency.push(transaction_with_price_and_currency);
+                    }
+
+                    // Sort transactions by timestamp
+                    transactions_with_price_and_currency.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
                     Ok(json!({
-                        "transactions": transactions,
+                        "transactions": transactions_with_price_and_currency,
                     }))
                 }
                 Err(_) => Err(Status::Unauthorized),
@@ -117,7 +215,7 @@ pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Sta
 
 // new transaction
 #[post("/transaction", format = "application/json", data = "<transaction>")]
-pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<NewTransaction>) -> Result<JsonValue, Status> {
+pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<TransactionReceiver>) -> Result<JsonValue, Status> {
     match cookies.get("token") {
         Some(cookie) => {
             let token = cookie.value();
@@ -133,27 +231,36 @@ pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<NewTran
                         .optional()
                         .map_err(|_| Status::InternalServerError)?;
 
+
                     let user = match user {
                         Some(user) => user,
                         None => return Err(Status::Unauthorized),
                     };
 
+                    // Fetch last price for the currency
+                    let last_price = schema::prices::table
+                        .filter(schema::prices::currency_id.eq(transaction.currency_id))
+                        .order(schema::prices::timestamp.desc())
+                        .first::<Price>(&*conn)
+                        .optional()
+                        .map_err(|_| Status::InternalServerError)?;
+
                     let new_transaction = NewTransaction {
                         user_id: user.id,
-                        symbol: transaction.symbol.clone(),
-                        price: transaction.price.clone(),
+                        currency_id: transaction.currency_id,
+                        price: last_price.unwrap().price,
                         quantity: transaction.quantity.clone(),
                         transaction_type: transaction.transaction_type.clone(),
-                        timestamp: transaction.timestamp.clone(),
                     };
 
-                    diesel::insert_into(schema::transactions::table)
+                    let transaction = diesel::insert_into(schema::transactions::table)
                         .values(&new_transaction)
                         .execute(&*conn)
                         .map_err(|_| Status::InternalServerError)?;
 
                     Ok(json!({
                         "status": "success",
+                        "transaction": transaction,
                     }))
                 }
                 Err(_) => Err(Status::Unauthorized),

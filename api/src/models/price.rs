@@ -15,7 +15,6 @@ pub struct Price {
 pub struct NewPrice {
     pub currency_id: i32,
     pub price: BigDecimal,
-    pub timestamp: NaiveDateTime,
 }
 
 // prices with id, currency_id, price, timestamp, symbol, name

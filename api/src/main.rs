@@ -40,6 +40,8 @@ fn main() {
             routes::update_password,
             routes::get_balance,
             routes::get_transactions,
+            routes::new_transaction,
+            routes::get_crypto_balance,
         ])
         .attach(DbConn::fairing())
         .attach(cors::CorsFairing);

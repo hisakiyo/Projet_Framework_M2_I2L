@@ -21,7 +21,7 @@ diesel::table! {
     transactions (id) {
         id -> Integer,
         user_id -> Integer,
-        symbol -> Varchar,
+        currency_id -> Integer,
         price -> Decimal,
         quantity -> Decimal,
         transaction_type -> Varchar,
@@ -39,6 +39,7 @@ diesel::table! {
 }
 
 diesel::joinable!(prices -> currencies (currency_id));
+diesel::joinable!(transactions -> currencies (currency_id));
 diesel::joinable!(transactions -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(

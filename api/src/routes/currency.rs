@@ -32,7 +32,6 @@ pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<J
         let new_price = NewPrice {
             currency_id: existing_currency.id,
             price: currency.price.clone(),
-            timestamp: Utc::now().naive_utc(),
         };
         diesel::insert_into(schema::prices::table)
             .values(&new_price)

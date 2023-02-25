@@ -12,7 +12,7 @@
                 <dl>
                   <dt class="truncate text-sm font-medium text-gray-500">{{ card.name }}</dt>
                   <dd>
-                    <div class="text-lg font-medium text-gray-900">{{ card.amount }}</div>
+                    <div class="text-lg font-medium text-gray-900">{{ card.amount }}<span class="font-medium text-gray-500"> {{ card.symbol }}</span></div>
                   </dd>
                 </dl>
               </div>
@@ -37,29 +37,32 @@
               <thead>
               <tr>
                 <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Transaction</th>
-                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant</th>
-                <th class="hidden bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900 md:block" scope="col">Statut</th>
+                <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Prix</th>
+                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant crypto</th>
+                <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Montant en $US</th>
+                <th class="bg-gray-50 px-6 py-3 text-left text-sm font-semibold text-gray-900" scope="col">Type</th>
                 <th class="bg-gray-50 px-6 py-3 text-right text-sm font-semibold text-gray-900" scope="col">Date</th>
               </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 bg-white">
               <tr v-for="transaction in transactions" :key="transaction.id" class="bg-white">
-                <td class="w-full max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  <div class="flex">
-                    <a :href="transaction.href" class="group inline-flex space-x-2 truncate text-sm">
-                      <p class="truncate text-gray-500 group-hover:text-gray-900">{{ transaction.name }}</p>
-                    </a>
-                  </div>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                  <p class="truncate text-gray-500 group-hover:text-gray-900">{{ transaction.id }}</p>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                  <span class="font-medium text-gray-900">{{ transaction.amount }}</span>
-                  {{ transaction.currency }}
+                  <span class="font-medium text-gray-900">{{ formatPrice(transaction.price) }}</span>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                  <span class="font-medium text-gray-900">{{ transaction.quantity }}<span class="font-medium text-gray-500"> {{ transaction.currency.symbol }}</span></span>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                  <span class="font-medium text-gray-900">{{ formatPrice(Math.ceil(transaction.quantity * transaction.price * 100)/100) }}</span>
                 </td>
                 <td class="hidden whitespace-nowrap px-6 py-4 text-sm text-gray-500 md:block">
-                  <span :class="[statusStyles[transaction.status], 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize']">{{ transaction.status }}</span>
+                  <span :class="[statusStyles[transaction.transaction_type], 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize']">{{ transaction.transaction_type === 'buy' ? 'Achat' : 'Vente' }}</span>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
-                  <time :datetime="transaction.datetime">{{ transaction.date }}</time>
+                  <time :datetime="transaction.datetime">{{ formatAgo(transaction.timestamp) }}</time>
                 </td>
               </tr>
               </tbody>
@@ -78,57 +81,72 @@ export default {
     return {
       cards: [
         { name: 'Solde du compte', href: '#', icon: '', amount: 'XXXX,XX €' },
-        // More items...
       ],
-      transactions: [
-        {
-          id: 1,
-          name: 'Payment to Molly Sanders',
-          href: '#',
-          amount: '$20,000',
-          currency: 'USD',
-          status: 'success',
-          date: 'July 11, 2020',
-          datetime: '2020-07-11',
-        },
-        {
-          id: 2,
-          name: 'Bitcoin',
-          href: '#',
-          amount: '$90,000',
-          currency: 'USD',
-          status: 'processing',
-          date: 'July 11, 2020',
-          datetime: '2020-07-11',
-        },
-        {
-          id: 3,
-          name: 'Payment to wip corp',
-          href: '#',
-          amount: '$100,000',
-          currency: 'USD',
-          status: 'failed',
-          date: 'July 11, 2020',
-          datetime: '2020-07-11',
-        },
-        // More transactions...
-      ],
+      prices: [],
+      transactions: null,
        statusStyles: {
-        success: 'bg-green-100 text-green-800',
-        processing: 'bg-yellow-100 text-yellow-800',
-        failed: 'bg-gray-100 text-gray-800',
+        buy: 'bg-green-100 text-green-800',
+        sell: 'bg-red-100 text-red-800',
       }
     }
   },
-  mounted() {
-    // get balance
-    this.$axios.get('/api/balance')
-      .then(response => {
-        this.cards[0].amount = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(response.data.balance);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  async mounted() {
+    await this.getPrices();
+    this.getBalance();
+    this.getTransactions();
+    this.getCryptoBalance();
   },
+  methods: {
+    formatAgo(date) {
+      return new Date(date).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' });
+    },
+    formatPrice(price) {
+      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(price);
+    },
+    getPrices() {
+        this.$axios.get('/api/currencies_with_price')
+          .then(response => {
+            this.prices = response.data;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+    },
+    getBalance() {
+      this.$axios.get('/api/balance')
+        .then(response => {
+          this.cards[0].amount = this.formatPrice(response.data.balance)
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    getTransactions() {
+      this.$axios.get('/api/transactions')
+        .then(response => {
+          this.transactions = response.data.transactions;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    getCryptoBalance() {
+      this.$axios.get('/api/crypto_balance')
+        .then(response => {
+          response.data.crypto_balance.forEach((crypto) => {
+            this.cards.push({
+              name: crypto.currency.name,
+              href: '#',
+              icon: '',
+              amount: crypto.quantity,
+              symbol: crypto.currency.symbol,
+            })
+          })
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  }
 };
 </script>
