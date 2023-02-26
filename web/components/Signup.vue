@@ -62,10 +62,10 @@ export default {
   name: 'Signup',
   data() {
     return {
-      username: 'ez',
-      email: 'ez@ez.ez',
-      password: 'ez',
-      repassword: 'ez',
+      username: 'Demo',
+      email: 'demo@test.com',
+      password: 'testtest',
+      repassword: 'testtest',
       msg: null,
     };
   },
