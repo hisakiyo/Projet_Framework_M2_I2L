@@ -17,14 +17,13 @@ pub fn get_currencies(conn: DbConn) -> Json<Vec<Currency>> {
 }
 
 #[post("/currencies", data = "<currency>")]
-pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<Json<NewCurrency>, Status> {
+pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<Json<Currency>, Status> {
     let existing_currencies = schema::currencies::table
         .filter(schema::currencies::symbol.eq(&currency.symbol))
         .load::<Currency>(&*conn)
         .map_err(|_| Status::InternalServerError)?;
 
     if let Some(existing_currency) = existing_currencies.first() {
-        // update price in price table
         let new_price = NewPrice {
             currency_id: existing_currency.id,
             price: currency.price.clone(),
@@ -43,6 +42,22 @@ pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<J
     
         diesel::insert_into(schema::currencies::table)
             .values(&new_currency)
+            .execute(&*conn)
+            .map_err(|_| Status::InternalServerError)?;
+
+        let new_currency = schema::currencies::table
+            .filter(schema::currencies::symbol.eq(&currency.symbol))
+            .first::<Currency>(&*conn)
+            .map_err(|_| Status::InternalServerError)?;
+
+        let new_price = NewPrice {
+            currency_id: new_currency.id,
+            price: currency.price.clone(),
+        };
+        println!("new_price: {:?}", new_price);
+        
+        diesel::insert_into(schema::prices::table)
+            .values(&new_price)
             .execute(&*conn)
             .map_err(|_| Status::InternalServerError)?;
 
