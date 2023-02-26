@@ -57,8 +57,8 @@ export default {
   name: 'Login',
   data() {
     return {
-      email: 'ez@ez.ez',
-      password: 'ez',
+      email: 'demo@test.com',
+      password: 'testtest',
       msg: null
     }
   },
