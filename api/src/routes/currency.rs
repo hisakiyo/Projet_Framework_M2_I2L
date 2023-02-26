@@ -6,9 +6,7 @@ use crate::{
 use rocket::{http::Status};
 use rocket_contrib::json::{Json};
 use diesel::prelude::*;
-use chrono::{Utc, NaiveDateTime};
 
-// get all currencies
 #[get("/currencies")]
 pub fn get_currencies(conn: DbConn) -> Json<Vec<Currency>> {
     let results = schema::currencies::table
@@ -20,13 +18,11 @@ pub fn get_currencies(conn: DbConn) -> Json<Vec<Currency>> {
 
 #[post("/currencies", data = "<currency>")]
 pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<Json<NewCurrency>, Status> {
-    // Check if currency already exists (by symbol)
     let existing_currencies = schema::currencies::table
         .filter(schema::currencies::symbol.eq(&currency.symbol))
         .load::<Currency>(&*conn)
         .map_err(|_| Status::InternalServerError)?;
 
-    // Si des currency existe déjà, on doit mettre à jour leur prix dans la table prix
     if let Some(existing_currency) = existing_currencies.first() {
         // update price in price table
         let new_price = NewPrice {
@@ -38,7 +34,6 @@ pub fn add_currency(conn: DbConn, currency: Json<CurrencyWithPrice>) -> Result<J
             .execute(&*conn)
             .map_err(|_| Status::InternalServerError)?;
 
-        // Return error 409
         return Err(Status::Conflict);
     } else {
         let new_currency = NewCurrency {

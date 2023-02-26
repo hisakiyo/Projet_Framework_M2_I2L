@@ -1,25 +1,13 @@
-FROM debian:buster AS builder
+# 1. This tells docker to use the Rust official image
+FROM rustlang/rust:nightly
 
-# You'll need to change `libmysqlclient-dev` to `libpq-dev` if you're using Postgres
-RUN apt-get update && apt-get install -y curl default-libmysqlclient-dev build-essential
+# 2. Copy the files in your machine to the Docker image
+COPY ./ ./
 
-# Install rust
-RUN curl https://sh.rustup.rs/ -sSf | \
-  sh -s -- -y --default-toolchain nightly-2023-02-18
-
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-ADD . ./
-
+# Build your program for release
 RUN cargo build --release
 
-FROM debian:buster
+RUN cargo install diesel_cli --no-default-features --features mysql
+RUN apt-get update && apt-get install -y netcat
 
-RUN apt-get update && apt-get install -y default-libmysqlclient-dev
-
-COPY --from=builder \
-  /target/release/api \
-  /usr/local/bin/
-
-WORKDIR /root
-CMD ROCKET_PORT=${PORT:-8000} /usr/local/bin/api
+CMD bash -c "while ! nc -z db 3306; do sleep 1; done; diesel migration run --database-url=mysql://root:Csec8m5VQH@db/projet_db && ./target/release/api"

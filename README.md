@@ -1,7 +1,9 @@
 # Projet_Framework_M2_I2L
 
-DATABASE_URL=mysql://projet:kCG6X6vzwU@127.0.0.1/projet_db    
+Projet site web crypto en Vue.js (front-end), en Rust (back-end) et MariaDB (base de données)
 
-ROCKET_DATABASES="{ projet_db = { url = \"$DATABASE_URL\" } }" 
 
-diesel migration run --database-url=mysql://root:Csec8m5VQH@127.0.0.1/projet_db 
+Commande pour lancer le projet:
+```
+docker compose up
+```

@@ -21,7 +21,7 @@ pub(crate) struct Claim {
 
 pub(crate) fn get_jwt() -> Result<String, ConfigError> {
     let mut config = Config::default();
-    config.merge(File::with_name("config"))?;
+    config.merge(File::with_name("config.toml"))?;
 
     let jwt_config: String = config.get("jwt.secret")?;
     Ok(jwt_config)

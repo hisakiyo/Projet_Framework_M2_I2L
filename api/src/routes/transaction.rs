@@ -4,19 +4,15 @@ use crate::{
     DbConn,
 };
 use bigdecimal::BigDecimal;
-use rocket::{self, http::{Cookie, Cookies}, Data};
+use rocket::{self, http::Cookies};
 use rocket::http::Status;
 use rocket_contrib::json::{Json, JsonValue,};
 use diesel::prelude::*;
 use config::{Config, ConfigError, File};
-use rocket::request::{self, Request, FromRequest,Outcome};
-use bcrypt::{DEFAULT_COST, hash, verify};
-use jsonwebtoken::{encode, Header, EncodingKey,DecodingKey,Validation };
-use chrono::{Utc, Duration, NaiveDateTime};
+use jsonwebtoken::{DecodingKey,Validation };
 use crate::routes::user::Claim;
 use crate::routes::user::get_jwt;
 
-// get starting balance
 fn get_starting_balance() -> Result<BigDecimal, ConfigError> {
     let mut config = Config::default();
     config.merge(File::with_name("config"))?;
@@ -26,7 +22,6 @@ fn get_starting_balance() -> Result<BigDecimal, ConfigError> {
 }
 
 
-// Get balance of the user. it combines all his transactions and returns the balance
 #[get("/balance")]
 pub fn get_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
     match cookies.get("token") {
@@ -55,7 +50,6 @@ pub fn get_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> 
                         .load::<Transaction>(&*conn)
                         .map_err(|_| Status::InternalServerError)?;
 
-                    // get starting balance from get_starting_balance() function
                     let mut balance = get_starting_balance().unwrap();
                     for transaction in transactions {
                         if transaction.transaction_type == "buy" {
@@ -76,9 +70,6 @@ pub fn get_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> 
     }
 }
 
-// get user crypto balance: how much of each crypto he has (ex: BTC: 0.5, ETH: 1.2)
-// It should add all transactions of the user and return the balance. If transaction is type sell, it should subtract the quantity from the balance of the currency
-// If transaction is type buy, it should add the quantity to the balance of the currency
 #[get("/crypto_balance")]
 pub fn get_crypto_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
     match cookies.get("token") {
@@ -146,7 +137,6 @@ pub fn get_crypto_balance(cookies: Cookies, conn: DbConn) -> Result<JsonValue, S
 }
 
 
-// Get all transactions of the user
 #[get("/transactions")]
 pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
     match cookies.get("token") {
@@ -215,7 +205,6 @@ pub fn get_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Sta
     }
 }
 
-// get last 5 transactions of the user
 #[get("/last_transactions")]
 pub fn get_last_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue, Status> {
     match cookies.get("token") {
@@ -285,7 +274,6 @@ pub fn get_last_transactions(cookies: Cookies, conn: DbConn) -> Result<JsonValue
     }
 }
 
-// new transaction
 #[post("/transaction", format = "application/json", data = "<transaction>")]
 pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<TransactionReceiver>) -> Result<JsonValue, Status> {
     match cookies.get("token") {
@@ -309,7 +297,6 @@ pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<Transac
                         None => return Err(Status::Unauthorized),
                     };
 
-                    // Fetch last price for the currency
                     let last_price = schema::prices::table
                         .filter(schema::prices::currency_id.eq(transaction.currency_id))
                         .order(schema::prices::timestamp.desc())
@@ -317,7 +304,6 @@ pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<Transac
                         .optional()
                         .map_err(|_| Status::InternalServerError)?;
 
-                    // if user has enough balance
                     if transaction.transaction_type == "sell" {
                         let transactions = schema::transactions::table
                             .filter(schema::transactions::user_id.eq(user.id))
@@ -362,7 +348,6 @@ pub fn new_transaction(cookies: Cookies, conn: DbConn, transaction: Json<Transac
                         if !found {
                             return Err(Status::BadRequest);
                         }
-                    // else, if buy, user must have enough money (only in USD. with prices). take the same code as #[get("/balance")] do price*quantity
                     } else {
                         let transactions = schema::transactions::table
                             .filter(schema::transactions::user_id.eq(user.id))

@@ -35,7 +35,7 @@
               </div>
 
               <div>
-                <button @click="login" class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">Connexion {{ $store.state.users.user}}</button>
+                <button @click="login" class="flex w-full justify-center rounded-md border border-transparent bg-sky-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">Connexion</button>
               </div>
 
               <div v-if="msg" :class="`bg-${msg.type}-100 border-l-4 border-${msg.type}-500 text-${msg.type}-700 p-4`">
