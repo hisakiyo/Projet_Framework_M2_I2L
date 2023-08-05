@@ -4,7 +4,7 @@ pub async fn fetch_currencies() -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let res = client
         .get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest")
-        .header("X-CMC_PRO_API_KEY", "55714849-9ba7-4086-849e-b1f58ac0353c")
+        .header("X-CMC_PRO_API_KEY", "")
         .send()
         .await?
         .text()
