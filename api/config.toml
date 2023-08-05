@@ -1,6 +1,6 @@
 [jwt]
 secret = "q9R3APNTXfQuu7farkpjeC7K54CGSNh34wzn8zLLznvikzXVMDAKvrd2gVtxVX9pbAnNFEharo6T5q9RC6zGq4KqBN4JEe7udaTE5MArJFoKSJHDrStaBCiFxdyuay8T"
 [cmc]
-secret = "55714849-9ba7-4086-849e-b1f58ac0353c"
+secret = ""
 [crypto]
 starting_balance = 10000
